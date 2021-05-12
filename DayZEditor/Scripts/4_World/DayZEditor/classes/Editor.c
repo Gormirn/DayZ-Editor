@@ -60,6 +60,7 @@ class Editor
 	
 	// Stack of Undo / Redo Actions
 	private ref EditorActionStack 				m_ActionStack;
+	private ref ShortcutKeys 					m_CurrentKeys = new ShortcutKeys();
 	
 	// private references
 	private EditorHudController 				m_EditorHudController;
@@ -67,7 +68,7 @@ class Editor
 	
 	private bool 								m_Active;
 	string 										EditorSettingsFile = "$profile:/Editor/Settings.json";
-	string										EditorSaveFile;
+	protected string							EditorSaveFile;
 	string										EditorDirectory = "$profile:/Editor/";
 	
 	// modes
@@ -76,7 +77,15 @@ class Editor
 	bool 										SnappingMode;
 	bool 										CollisionMode;
 
-	string 										Version = "v" + GetVersionNumber();
+	string 										BanReason = "null";
+	string 										Version = "Version#: " + GetVersionNumber();
+	
+	// Loot Editing
+	private Object 								m_LootEditTarget;
+	private bool 								m_LootEditMode;
+	private vector 								m_PositionBeforeLootEditMode;
+	private ref EditorMapGroupProto 			m_EditorMapGroupProto;
+	static float 								LootYOffset;
 	
 	private void Editor(PlayerBase player) 
 	{
@@ -102,6 +111,7 @@ class Editor
 		
 		// Command Manager
 		CommandManager 		= new EditorCommandManager();
+		CommandManager.Init();
 		
 		// Needs to exist on clients for Undo / Redo syncing
 		m_SessionCache 		= new EditorObjectDataMap();
@@ -117,9 +127,7 @@ class Editor
 			ScriptRPC rpc = new ScriptRPC();
 			rpc.Send(null, EditorServerModuleRPC.EDITOR_CLIENT_CREATED, true);
 		}
-		
-		SetActive(true);
-		
+				
 		thread AutoSaveThread();
 	}
 	
@@ -139,14 +147,11 @@ class Editor
 		delete m_SessionCache;
 		delete ObjectInHand;
 	}
-
 	
 	static Editor Create(PlayerBase player)
 	{
 		EditorLog.Trace("Editor::Create");
 		g_Editor = new Editor(player);
-		g_Editor.SetActive(false);
-		g_Editor.SetActive(true);
 		return g_Editor;
 	}
 	
@@ -220,25 +225,38 @@ class Editor
 			m_EditorHud.GetTemplateController().SetInfoObjectPosition(selected_objects[0].GetPosition());
 		}
 		
-		CommandManager.CutCommand.SetCanExecute(selected_objects.Count() > 0);
-		CommandManager.CopyCommand.SetCanExecute(selected_objects.Count() > 0);
+		CommandManager[EditorCutCommand].SetCanExecute(selected_objects.Count() > 0);
+		CommandManager[EditorCopyCommand].SetCanExecute(selected_objects.Count() > 0);
 		//PasteCommand.SetCanExecute(EditorClipboard.IsClipboardValid());
 
-		CommandManager.SnapCommand.SetCanExecute(false); // not implemented
+		CommandManager[EditorSnapCommand].SetCanExecute(false); // not implemented
 		
 		// Shit code. Theres better ways to do this CanUndo and CanRedo are slow
-		CommandManager.UndoCommand.SetCanExecute(CanUndo());
-		CommandManager.RedoCommand.SetCanExecute(CanRedo());
+		CommandManager[EditorUndoCommand].SetCanExecute(CanUndo());
+		CommandManager[EditorRedoCommand].SetCanExecute(CanRedo());
 				
-		EditorLog.CurrentLogLevel = log_lvl;		
-		
-		// God Mode
-		if (m_Player) {
-			m_Player.SetHealth("", "Health", 100);
-			m_Player.SetHealth("", "Shock", 100);
-		}
+		EditorLog.CurrentLogLevel = log_lvl;
 	}
 	
+	// Get Selected player in Editor
+	PlayerBase GetPlayer()
+	{
+		return m_Player;
+	}
+	
+	void SetPlayer(PlayerBase player)
+	{
+		// You can only control one player, this is how
+		EditorObjectMap placed_objects = GetPlacedObjects();
+		foreach (int id, EditorObject placed_object: placed_objects) {
+			PlayerBase loop_player = PlayerBase.Cast(placed_object.GetWorldObject());
+			if (loop_player && loop_player != player) {
+				placed_object.Control = false;
+			}
+		}
+		
+		m_Player = player;
+	}
 	
 	void ProcessInput(Input input)
 	{
@@ -287,7 +305,7 @@ class Editor
 	
 	bool OnMouseDown(int button)
 	{
-		EditorLog.Trace("Editor::OnMouseDown");
+		EditorLog.Trace("Editor::OnMouseDown " + button);
 		
 		Widget target = GetWidgetUnderCursor();
 		if (!target) {
@@ -302,14 +320,13 @@ class Editor
 			case MouseState.LEFT: {
 
 				if (IsPlacing()) {
-					CommandManager.PlaceObjectCommand.Execute(this, null);
+					PlaceObject();
 					return true;
 				}
 				
-				if (!target) {
+				if (!target || target == m_EditorHud.EditorMapWidget) {
 					ClearSelection();
 				}
-				
 				
 				if (!GetBrush() && GetSelectedObjects().Count() == 0) {
 					
@@ -376,9 +393,7 @@ class Editor
 	{
 		return false;
 	}
-	
-	private ref ShortcutKeys m_CurrentKeys = new ShortcutKeys();
-	
+		
 	// Return TRUE if handled.	
 	bool OnKeyPress(int key)
 	{
@@ -392,7 +407,7 @@ class Editor
 		}
 		
 		m_CurrentKeys.Insert(key);
-		EditorCommand command = CommandManager.CommandShortcutMap[m_CurrentKeys.GetMask()];
+		EditorCommand command = CommandManager.GetCommandFromShortcut(m_CurrentKeys.GetMask());
 		if (!command) {
 			return false;
 		}
@@ -507,7 +522,7 @@ class Editor
 			return null;
 		}
 		
-		EntityAI entity = editor_hologram.GetWorldObject();
+		Object entity = editor_hologram.GetWorldObject();
 		if (!entity) {
 			return null;
 		}
@@ -518,7 +533,6 @@ class Editor
 		}
 		
 		EditorObject editor_object = CreateObject(editor_object_data);
-		
 		if (!editor_object) { 
 			return null;
 		}
@@ -542,15 +556,7 @@ class Editor
 		delete ObjectInHand;
 		EditorEvents.StopPlacing(this);
 	}
-	
 		
-	private Object m_LootEditTarget;
-	private bool m_LootEditMode;
-	private vector m_PositionBeforeLootEditMode;
-	private ref EditorMapGroupProto m_EditorMapGroupProto;
-	
-	static float LootYOffset;
-	
 	void EditLootSpawns(EditorPlaceableItem placeable_item)
 	{
 		EditorLog.Trace("Editor::EditLootSpawns %1", placeable_item.Type);
@@ -711,11 +717,21 @@ class Editor
 			Settings.AutoSaveTimer = Math.Clamp(Settings.AutoSaveTimer, 10, FLT_MAX);
 			Sleep(Settings.AutoSaveTimer * 1000);
 			if (EditorSaveFile != string.Empty) {
-				CommandManager.SaveCommand.Execute(this, null);
+				CommandManager[EditorSaveCommand].Execute(this, null);
 			}
 		}
 	}
 
+	void SetSaveFile(string save_file)
+	{
+		EditorSaveFile = save_file;
+		GetEditorHud().GetController().NotifyPropertyChanged("m_Editor.EditorSaveFile");
+	}
+	
+	string GetSaveFile()
+	{
+		return EditorSaveFile;
+	}
 	
 	void SetBrush(EditorBrush brush) 
 	{
@@ -731,7 +747,6 @@ class Editor
 	{
 		return ObjectInHand != null; 
 	}
-	
 	
 	EditorObject CreateObject(notnull Object target, EditorObjectFlags flags = EditorObjectFlags.ALL, bool create_undo = true) 
 	{
@@ -758,7 +773,6 @@ class Editor
 		if (create_undo) {
 			InsertAction(action);
 		}
-
 		
 		return editor_object;
 	}
@@ -770,7 +784,7 @@ class Editor
 		EditorObjectMap object_set = new EditorObjectMap();
 		EditorAction action = new EditorAction("Delete", "Create");
 		
-		foreach (int id, ref EditorObjectData editor_object_data: data_list) {
+		foreach (int id, EditorObjectData editor_object_data: data_list) {
 			
 			// Cache Data (for undo / redo)
 			if (!editor_object_data) continue;
@@ -882,12 +896,10 @@ class Editor
 		m_ObjectManager.SelectObject(target);
 	}
 	
-	
 	void DeselectObject(EditorObject target) 
 	{
 		m_ObjectManager.DeselectObject(target);
 	}
-	
 	
 	void ToggleSelection(EditorObject target) 
 	{
@@ -957,11 +969,9 @@ class Editor
 		return position;
 	}
 		
-	
-	private string m_BanReason = "null";
 	bool IsBannedClient(out string reason)
 	{
-		reason = m_BanReason;
+		reason = BanReason;
 		return reason != "null";
 	}
 	
@@ -979,16 +989,16 @@ class Editor
 		}
 		
 		RestContext rest = GetRestApi().GetRestContext("https:\/\/dayz-editor-default-rtdb.firebaseio.com\/");
-		m_BanReason = rest.GET_now(string.Format("bans/%1.json", GetGame().GetUserManager().GetSelectedUser().GetUid()));
+		BanReason = rest.GET_now(string.Format("bans/%1.json", GetGame().GetUserManager().GetSelectedUser().GetUid()));
 		
 		// Temporary hotfix until we can re-implement the old system
 		// dont really like it but it will have to do
-		if (m_BanReason == "App Error") {
-			m_BanReason = "null";
+		if (BanReason == "App Error") {
+			BanReason = "null";
 		}
 		
-		if (m_BanReason == "Timeout") {
-			m_BanReason = "null";
+		if (BanReason == "Timeout") {
+			BanReason = "null";
 		}
 	}
 	

@@ -6,8 +6,12 @@ class EditorDialogBase: DialogBase
 	void EditorDialogBase(string title)
 	{
 		m_Editor = GetEditor();
-		if (m_Editor && m_Editor.Settings.LockCameraDuringDialogs) {
+		
+		if (m_Editor) {
 			m_EditorHud = m_Editor.GetEditorHud();	
+		}
+		
+		if (m_Editor && m_Editor.Settings.LockCameraDuringDialogs) {
 			m_Editor.GetCamera().MoveEnabled = false;
 			m_Editor.GetCamera().LookEnabled = false;
 			m_EditorHud.ShowCursor(true);

@@ -4,16 +4,8 @@ enum EditorClientModuleRPC
 	COUNT
 };
 
-enum BetterMouseState {
-	LEFT = 1,
-	RIGHT = 2,
-	MIDDLE = 4
-};
-
 class EditorClientModule: JMModuleBase
 {
-	
-	// Public Members
 	void EditorClientModule() 
 	{
 		EditorLog.Info("EditorClientModule");
@@ -51,13 +43,13 @@ class EditorClientModule: JMModuleBase
 		if (GetEditor()) {
 			GetEditor().Update(timeslice);
 		}
-				
+		/*
 		if (GetEditor() && GetEditor().GetCamera() && !IsMissionOffline()) {
 			ScriptRPC update_rpc = new ScriptRPC();
 			update_rpc.Write(GetEditor().GetCamera().GetPosition());
 			update_rpc.Write(GetEditor().GetCamera().GetOrientation());
 			//update_rpc.Send(null, EditorServerModuleRPC.EDITOR_CLIENT_UPDATE, true);
-		}
+		}*/
 	}
 	
 	override bool IsServer() 
@@ -88,8 +80,12 @@ class EditorClientModule: JMModuleBase
 	override void OnMissionLoaded()
 	{
 		EditorLog.Trace("Editor::OnMissionLoaded");
+		GetEditor().SetActive(true);
+		
+		// Just resolves like 37 different issues surrounding DayZ and DayZ related titles
+		GetEditor().SetActive(false);
+		GetEditor().SetActive(true);
 	}
-	
 	
 	// Inputs
 	private bool ShouldProcessInput(UAInput input)
@@ -162,7 +158,6 @@ class EditorClientModule: JMModuleBase
 				GetGame().GetPlayer().DisableSimulation(GetEditor().GetEditorHud().IsVisible());
 			}
 		}
-		
 	}
 	
 	private void OnEditorToggleMap(UAInput input)
@@ -194,7 +189,7 @@ class EditorClientModule: JMModuleBase
 	{		
 		if (!ShouldProcessInput(input)) return;
 		EditorLog.Trace("Editor::OnEditorTeleportPlayerToCursor");
-		
+				
 		GetEditor().TeleportPlayerToCursor();
 	}
 		

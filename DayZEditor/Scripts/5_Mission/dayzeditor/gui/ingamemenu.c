@@ -35,7 +35,6 @@ modded class InGameMenu
 	{
 		if (!IsMissionOffline())
 			return;
-
 		
 		EditorLoadMapCommand cmd = new EditorLoadMapCommand();
 		cmd.Execute(this, null);
@@ -48,7 +47,7 @@ modded class InGameMenu
 			return;
 		}
 		
-		GetEditor().CommandManager.OpenCommand.Execute(this, null);
+		GetEditor().CommandManager[EditorOpenCommand].Execute(this, null);
 	}
 	
 	override void OnClick_Exit()
@@ -58,6 +57,6 @@ modded class InGameMenu
 			return;
 		}
 		
-		GetEditor().CommandManager.ExitCommand.Execute(this, null);
+		GetEditor().CommandManager[EditorExitCommand].Execute(this, null);
 	}
 }

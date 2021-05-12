@@ -95,11 +95,11 @@ class EditorObject: EditorWorldObject
 			m_Data.WorldObject = m_WorldObject;
 		}
 		
-		m_WorldObject = EntityAI.Cast(m_Data.WorldObject);
+		m_WorldObject = m_Data.WorldObject;
 		
 		// Trash the object because its uncreatable
 		if (!m_WorldObject) { 
-			delete this;
+			EditorLog.Error("Object failed to create! If there was a crash, this item caused it: %1", m_Data.Type);
 			return;
 		}
 		
@@ -144,7 +144,6 @@ class EditorObject: EditorWorldObject
 		for (int i = 0; i < 8; i++) {
 			m_SnapPoints.Insert(new EditorSnapPoint(this, m_LineVerticies[i]));
 		}
-
 		
 		// Bounding Box
 		BoundingBoxEnabled = ((m_Data.Flags & EditorObjectFlags.BBOX) == EditorObjectFlags.BBOX);
@@ -174,7 +173,8 @@ class EditorObject: EditorWorldObject
 		Update();
 		DestroyBoundingBox();
 		
-		//GetGame().ObjectDelete(m_WorldObject);
+		// this was commented out for a while and im not sure why
+		GetGame().ObjectDelete(m_WorldObject);
 				
 		// Store map objects
 		if (m_WorldObject) {
@@ -190,7 +190,6 @@ class EditorObject: EditorWorldObject
 		delete OnObjectDeselected;
 	}
 			
-	
 	private bool m_IsSelected;
 	bool IsSelected() return m_IsSelected;
 	void OnSelected()
@@ -268,7 +267,6 @@ class EditorObject: EditorWorldObject
 	float GetScale()
 	{
 		return GetWorldObject().GetScale();
-		return 1;
 	}
 	
 	void Update() 
@@ -300,13 +298,18 @@ class EditorObject: EditorWorldObject
 				Debug.DrawSphere(point.GetWorldObject().GetWorldPosition());
 			}
 		}
+		
+		PlayerBase player = PlayerBase.Cast(m_WorldObject);
+		if (player && player == GetEditor().GetPlayer()) {
+			Control = true;
+		}	
 	}
 	
 	// EditorObjects can also be psuedo-controllers
 	void PropertyChanged(string property_name)
 	{
 		EditorLog.Trace("EditorObject::PropertyChanged %1", property_name);
-		
+
 		switch (property_name) {
 			
 			case "Name": {
@@ -356,12 +359,20 @@ class EditorObject: EditorWorldObject
 			}
 			
 			case "Control": {
-				ControlPlayer(Control);
+				PlayerBase player = PlayerBase.Cast(m_WorldObject);
+				if (player) {
+					GetEditor().SetPlayer(player);
+				}				
+				
+				GetEditor().GetEditorHud().GetController().PropertyChanged("ControlPlayerState");
 				break;
 			}
 			
 			case "Simulate": {
-				m_WorldObject.DisableSimulation(!Simulate);
+				EntityAI ai = EntityAI.Cast(m_WorldObject);
+				if (ai) {
+					ai.DisableSimulation(!Simulate);
+				}
 				break;
 			}
 			
@@ -632,24 +643,22 @@ class EditorObject: EditorWorldObject
 			m_CenterLine.ClearFlags(EntityFlags.VISIBLE, false);
 	}
 	
-
 	bool SetAnimation(string anim_name)
 	{
 		EditorLog.Trace("EditorObject::SetAnimation");
 		if (m_WorldObject.IsMan()) {
-			DayZPlayerImplement.Cast(m_WorldObject).EditorAnimationStart(anim_name);
+			//DayZPlayerImplement.Cast(m_WorldObject).EditorAnimationStart(anim_name);
 			return true;
 		}
 		
 		return false;
 	}
-
 	
 	void ResetAnimation()
 	{
 		EditorLog.Trace("EditorObject::SetAnimation");
 		if (m_WorldObject.IsMan()) {
-			DayZPlayerImplement.Cast(GetWorldObject()).EditorAnimationReset();
+			//DayZPlayerImplement.Cast(GetWorldObject()).EditorAnimationReset();
 		}
 	}
 	

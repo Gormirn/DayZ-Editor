@@ -1,98 +1,147 @@
 class EditorCommandManager
 {
-	ref map<int, EditorCommand> CommandShortcutMap = new map<int, EditorCommand>();
-	
-	// Editor Commands
-	ref EditorNewCommand NewCommand;
-	ref EditorOpenCommand OpenCommand;
-	ref EditorSaveCommand SaveCommand;
-	ref EditorSaveAsCommand SaveAsCommand;
-	ref EditorCloseCommand CloseCommand;
-	ref EditorExitCommand ExitCommand;
-	ref EditorEscapeCommand EscapeCommand;
-	
-	ref EditorUndoCommand UndoCommand;
-	ref EditorRedoCommand RedoCommand;
-	ref EditorSelectAllCommand SelectAllCommand;
-	ref EditorDeleteCommand DeleteCommand;
-	
-	ref EditorCutCommand CutCommand;
-	ref EditorCopyCommand CopyCommand;
-	ref EditorPasteCommand PasteCommand;
-	
-	ref EditorMagnetCommand MagnetCommand;
-	ref EditorGroundCommand GroundCommand;
-	ref EditorSnapCommand SnapCommand;
-	ref EditorCollisionCommand CollisionCommand;
-	
-	ref EditorEnvironmentControlCommand EnvironmentControlCommand;
-	ref EditorPreferencesCommand PreferencesCommand;
-	ref EditorCameraControlsCommand CameraControlsCommand;
-	ref EditorReloadHudCommand ReloadHudCommand;
-	ref EditorReloadBrushesCommand ReloadBrushesCommand;
-	ref EditorLootEditorCommand LootEditorCommand;
-	ref EditorAddToFavoritesCommand AddToFavoritesCommand;
-	
-	ref EditorPlaceObjectCommand PlaceObjectCommand;
-	
-	ref EditorBrushPropertiesCommand BrushPropertiesCommand;
-	ref EditorBrushToggleCommand BrushToggleCommand;	
-	ref EditorBrushDensityCommand BrushDensityCommand;
-	ref EditorBrushRadiusCommand BrushRadiusCommand;
-	
-	ref EditorObjectPropertiesCommand ObjectPropertiesCommand;
-	ref EditorShowCommand ShowCommand;
-	ref EditorHideCommand HideCommand;
-	ref EditorLockCommand LockCommand;
-	ref EditorUnlockCommand UnlockCommand;
-	
-	ref EditorExportToInitFile ExportToInitFile;
-	ref EditorExportToExpansion ExportToExpansion;
-	ref EditorExportToTerrainBuilder ExportToTerrainBuilder;
-	ref EditorExportToVPP ExportToVPP;
-	ref EditorExportToCOM ExportToCOM;
-	ref EditorExportToEvents ExportToEvents;
-	
-	ref EditorImportFromInit ImportFromInitFile;
-	ref EditorImportFromExpansion ImportFromExpansionCommand;
-	ref EditorImportFromTerrainBuilder ImportFromTerrainBuilderCommand;
-	ref EditorImportFromVPP ImportFromVPPCommand;
-	ref EditorImportFromCOM ImportFromCOM;
-	
-	ref EditorScriptEditorCommand ScriptEditorCommand;
-	
-	ref EditorJoinDiscordCommand JoinDiscordCommand;
-	ref EditorOpenWikiCommand OpenWikiCommand;
-	
-	ref EditorDonateCommand DonateCommand;
-	ref EditorHelpCommand HelpCommand;
-	
-	
-	void EditorCommandManager()
-	{			
-		for (int i = 0; i < Type().GetVariableCount(); i++) {
-			string variable_name = Type().GetVariableName(i);
-			typename variable_type = Type().GetVariableType(i);
-			if (variable_type.IsInherited(EditorCommand)) {
-				EditorCommand command = EditorCommand.Cast(variable_type.Spawn());
-				EnScript.SetClassVar(this, variable_name, 0, command);
-				if (command.GetShortcut()) {
-					CommandShortcutMap.Insert(command.GetShortcut().GetMask(), command);
-				}
-			}
-		}
-	}
+	protected ref map<typename, ref EditorCommand> m_Commands = new map<typename, ref EditorCommand>();
+	protected ref map<int, EditorCommand> m_CommandShortcutMap = new map<int, EditorCommand>();
+
+	// This is done specifically for the ViewBindings that bind to these on the toolbar
+	// if you adapt ViewBinding to call a function, to acquire a delegate. ill give you $30
+	EditorCommand NewCommand;
+	EditorCommand OpenCommand;
+	EditorCommand SaveCommand;
+	EditorCommand SaveAsCommand;
+	EditorCommand CloseCommand;
+	EditorCommand DeleteCommand;
+	EditorCommand ExitCommand;
+	EditorCommand EscapeCommand;
+	EditorCommand UndoCommand;
+	EditorCommand RedoCommand;
+	EditorCommand SelectAllCommand;
+	EditorCommand CutCommand;
+	EditorCommand CopyCommand;
+	EditorCommand PasteCommand;
+	EditorCommand MagnetCommand;
+	EditorCommand GroundCommand;
+	EditorCommand SnapCommand;
+	EditorCommand CollisionCommand;
+	EditorCommand BrushToggleCommand;
+	EditorCommand BrushDensityCommand;
+	EditorCommand BrushRadiusCommand;
 	
 	void ~EditorCommandManager()
+	{		
+		delete m_Commands;
+		delete m_CommandShortcutMap;
+	}
+	
+	void Init()
 	{
-		for (int i = 0; i < Type().GetVariableCount(); i++) {
-			string variable_name = Type().GetVariableName(i);
-			typename variable_type = Type().GetVariableType(i);
-			if (variable_type.IsInherited(EditorCommand)) {
-				EditorCommand command;
-				EnScript.GetClassVar(this, variable_name, 0, command);
-				delete command;
-			}
+		NewCommand = RegisterCommand(EditorNewCommand);
+		OpenCommand = RegisterCommand(EditorOpenCommand);
+		SaveCommand = RegisterCommand(EditorSaveCommand);
+		SaveAsCommand = RegisterCommand(EditorSaveAsCommand);
+		CloseCommand = RegisterCommand(EditorCloseCommand);
+		ExitCommand = RegisterCommand(EditorExitCommand);
+		EscapeCommand = RegisterCommand(EditorEscapeCommand);
+	
+		UndoCommand = RegisterCommand(EditorUndoCommand);
+		RedoCommand = RegisterCommand(EditorRedoCommand);
+		SelectAllCommand = RegisterCommand(EditorSelectAllCommand);
+		DeleteCommand = RegisterCommand(EditorDeleteCommand);
+	
+		CutCommand = RegisterCommand(EditorCutCommand);
+		CopyCommand = RegisterCommand(EditorCopyCommand);
+		PasteCommand = RegisterCommand(EditorPasteCommand);
+	
+		MagnetCommand = RegisterCommand(EditorMagnetCommand);
+		GroundCommand = RegisterCommand(EditorGroundCommand);
+		SnapCommand = RegisterCommand(EditorSnapCommand);
+		CollisionCommand = RegisterCommand(EditorCollisionCommand);
+	
+		RegisterCommand(EditorDumpSceneCommand);
+		RegisterCommand(EditorEnvironmentControlCommand);
+		RegisterCommand(EditorPreferencesCommand);
+		RegisterCommand(EditorCameraControlsCommand);
+		RegisterCommand(EditorReloadHudCommand);
+		RegisterCommand(EditorReloadBrushesCommand);
+		RegisterCommand(EditorLootEditorCommand);
+		RegisterCommand(EditorAddToFavoritesCommand);
+	
+		RegisterCommand(EditorPlaceObjectCommand);
+	
+		RegisterCommand(EditorBrushPropertiesCommand);
+		BrushToggleCommand = RegisterCommand(EditorBrushToggleCommand);
+		BrushDensityCommand = RegisterCommand(EditorBrushDensityCommand);
+		BrushRadiusCommand = RegisterCommand(EditorBrushRadiusCommand);
+	
+		RegisterCommand(EditorObjectPropertiesCommand);
+		RegisterCommand(EditorShowCommand);
+		RegisterCommand(EditorHideCommand);
+		RegisterCommand(EditorLockCommand);
+		RegisterCommand(EditorUnlockCommand);
+	
+		RegisterCommand(EditorExportToInitFile);
+		RegisterCommand(EditorExportToExpansion);
+		RegisterCommand(EditorExportToTerrainBuilder);
+		RegisterCommand(EditorExportToVPP);
+		RegisterCommand(EditorExportToCOM);
+		RegisterCommand(EditorExportToEvents);
+		RegisterCommand(EditorExportToMapGroupPos);
+		RegisterCommand(EditorExportLoaderCache);
+	
+		RegisterCommand(EditorImportFromInit);
+		RegisterCommand(EditorImportFromExpansion);
+		RegisterCommand(EditorImportFromTerrainBuilder);
+		RegisterCommand(EditorImportFromVPP);
+		RegisterCommand(EditorImportFromCOM);
+	
+		RegisterCommand(EditorScriptEditorCommand);
+	
+		RegisterCommand(EditorJoinDiscordCommand);
+		RegisterCommand(EditorOpenWikiCommand);
+	
+		RegisterCommand(EditorDonateCommand);
+		RegisterCommand(EditorHelpCommand);
+	}
+	
+	EditorCommand RegisterCommand(typename command_type)
+	{
+		if (!command_type.IsInherited(EditorCommand)) {
+			EditorLog.Error("Command must inherit from EditorCommand");
+			return null;
 		}
+		
+		EditorCommand command = EditorCommand.Cast(command_type.Spawn());
+		if (!command) {
+			EditorLog.Error("Invalid command");
+			return null;
+		}
+		
+		this[command_type] = command;
+		
+		if (command.GetShortcut()) {
+			m_CommandShortcutMap.Insert(command.GetShortcut().GetMask(), command);
+		}	
+		
+		return command;	
+	}
+	
+	void Set(typename command_type, EditorCommand command)
+	{
+		m_Commands.Insert(command_type, command);
+	}
+	
+	EditorCommand Get(typename command_type)
+	{
+		return m_Commands[command_type];
+	}
+	
+	array<EditorCommand> GetCommands()
+	{
+		return m_Commands.GetValueArray();
+	}
+	
+	EditorCommand GetCommandFromShortcut(int shortcut)
+	{
+		return m_CommandShortcutMap[shortcut];
 	}
 }

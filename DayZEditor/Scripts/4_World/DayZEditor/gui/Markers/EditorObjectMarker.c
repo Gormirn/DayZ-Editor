@@ -3,7 +3,7 @@ class EditorObjectMarker: EditorMarker
 	protected Editor m_Editor;
 	protected EditorObject m_EditorObject;
 
-	protected ref DragHandler m_DragHandler;
+	protected ref EditorDragHandler m_DragHandler;
 	
 	void EditorObjectMarker(EditorObject editor_object)
 	{
@@ -166,7 +166,7 @@ class EditorObjectMarker: EditorMarker
 	
 	override bool OnDoubleClick(Widget w, int x, int y, int button)
 	{
-		m_Editor.CommandManager.ObjectPropertiesCommand.Execute(this, null);
+		m_Editor.CommandManager[EditorObjectPropertiesCommand].Execute(this, null);
 		
 		return true;
 	}
@@ -176,7 +176,7 @@ class EditorObjectMarker: EditorMarker
 		return m_EditorObject; 
 	}
 	
-	DragHandler GetDragHandler() 
+	EditorDragHandler GetDragHandler() 
 	{
 		return m_DragHandler; 
 	}

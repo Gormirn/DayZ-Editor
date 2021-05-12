@@ -1,6 +1,6 @@
 PanelWidgetClass EditorPosElement {
  clipchildren 0
- size 1 24
+ size 1 18
  hexactpos 1
  vexactpos 1
  hexactsize 0
@@ -10,7 +10,7 @@ PanelWidgetClass EditorPosElement {
   WrapSpacerWidgetClass PositionSpacer {
    clipchildren 1
    ignorepointer 1
-   size 1 24
+   size 1 18
    halign right_ref
    hexactpos 1
    vexactpos 1
@@ -25,7 +25,7 @@ PanelWidgetClass EditorPosElement {
     TextWidgetClass EditorPosElementLabel {
      ignorepointer 1
      position 0 0
-     size 0.2 24
+     size 0.2 18
      hexactpos 1
      vexactpos 1
      hexactsize 0
@@ -40,32 +40,29 @@ PanelWidgetClass EditorPosElement {
       }
      }
     }
-    WrapSpacerWidgetClass frame_x {
+    PanelWidgetClass frame_x {
+     clipchildren 1
      ignorepointer 1
-     position 0 0
+     color 1 1 1 0.9961
      size 0.25 1
+     valign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 0
-     Padding 0
-     Margin 0
-     "Size To Content H" 1
-     "Size To Content V" 1
-     content_valign center
+     style Slim_Outline2
      {
       PanelWidgetClass lbl_x0 {
        ignorepointer 1
        keepsafezone 0
        color 0.7647 0.1804 0.102 1
-       position 0 0
-       size 24 24
-       halign center_ref
+       position 1 0
+       size 0.18 0.95
        valign center_ref
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
        style rover_sim_colorable
        {
         TextWidgetClass x0 {
@@ -88,32 +85,35 @@ PanelWidgetClass EditorPosElement {
        }
       }
       PanelWidgetClass txt_x0 {
+       clipchildren 1
        ignorepointer 1
-       position 0 0
-       size 150 24
+       color 0.7647 0.1804 0.102 0.0784
+       position 20 0
+       size 1 1
+       valign center_ref
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
-       style blank
+       hexactsize 0
+       vexactsize 0
+       style rover_sim_colorable
        {
-        MultilineEditBoxWidgetClass x_value {
+        EditBoxWidgetClass x_value {
          visible 1
-         size 0.9 0.9
-         halign center_ref
+         clipchildren 1
+         color 1 1 1 0.9608
+         position 14 0
+         size 0.93 0.9
          valign center_ref
          hexactpos 1
          vexactpos 1
          hexactsize 0
          vexactsize 0
          scriptclass "ViewBinding"
-         style DayZNormal
+         style Default
          text "reee"
-         font "gui/fonts/MetronLight22"
-         "exact text" 1
-         "text valign" center
-         lines 1
-         "limit visible" 0
+         "limit visible" 1
+         "exact text" 0
+         font "gui/fonts/metronbook"
          {
           ScriptParamsClass {
            Binding_Name "X"
@@ -125,32 +125,37 @@ PanelWidgetClass EditorPosElement {
       }
      }
     }
-    WrapSpacerWidgetClass frame_y {
+    FrameWidgetClass x_y_spacer {
      ignorepointer 1
-     position 0 0
+     position 10 10
+     size 4 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 0
+    }
+    PanelWidgetClass frame_y {
+     ignorepointer 1
+     color 1 1 1 0.9961
      size 0.25 1
+     valign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 0
-     Padding 0
-     Margin 0
-     "Size To Content H" 1
-     "Size To Content V" 1
-     content_valign center
+     style Slim_Outline2
      {
       PanelWidgetClass lbl_y {
        ignorepointer 1
        keepsafezone 0
        color 0.5765 0.8157 0.2196 1
-       position 0 0
-       size 24 24
-       halign center_ref
+       position 1 0
+       size 0.18 0.95
        valign center_ref
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
        style rover_sim_colorable
        {
         TextWidgetClass y {
@@ -175,27 +180,33 @@ PanelWidgetClass EditorPosElement {
       }
       PanelWidgetClass txt_y {
        ignorepointer 1
-       position 0 0
-       size 150 24
+       color 0.5765 0.8157 0.2196 0.0784
+       position 20 0
+       size 0.88 1
+       valign center_ref
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
+       style rover_sim_colorable
        {
-        MultilineEditBoxWidgetClass y_value {
+        EditBoxWidgetClass y_value {
          visible 1
-         size 0.9 0.9
-         halign center_ref
+         keepsafezone 0
+         color 1 1 1 0.9961
+         position 14 0
+         size 1 0.9
          valign center_ref
          hexactpos 1
          vexactpos 1
          hexactsize 0
          vexactsize 0
          scriptclass "ViewBinding"
-         style DayZNormal
+         style highlight_green_1
          text "reee"
-         font "gui/fonts/MetronLight22"
-         "exact text" 1
+         "limit visible" 1
+         "exact text" 0
+         font "gui/fonts/metronbook"
          {
           ScriptParamsClass {
            Binding_Name "Y"
@@ -207,32 +218,39 @@ PanelWidgetClass EditorPosElement {
       }
      }
     }
-    WrapSpacerWidgetClass frame_z {
+    FrameWidgetClass y_z_spacer {
      ignorepointer 1
-     position 0 0
+     position 10 10
+     size 4 1
+     hexactpos 1
+     vexactpos 1
+     hexactsize 1
+     vexactsize 0
+    }
+    PanelWidgetClass frame_z {
+     clipchildren 1
+     ignorepointer 1
+     color 1 1 1 0.9961
      size 0.25 1
+     valign center_ref
      hexactpos 1
      vexactpos 1
      hexactsize 0
      vexactsize 0
-     Padding 0
-     Margin 0
-     "Size To Content H" 1
-     "Size To Content V" 1
-     content_valign center
+     style Slim_Outline2
      {
       PanelWidgetClass lbl_z {
+       clipchildren 1
        ignorepointer 1
        keepsafezone 0
        color 0.2588 0.5176 0.9176 1
-       position 0 0
-       size 24 24
-       halign center_ref
+       position 1 0
+       size 0.18 0.95
        valign center_ref
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
        style rover_sim_colorable
        {
         TextWidgetClass z {
@@ -254,28 +272,37 @@ PanelWidgetClass EditorPosElement {
        }
       }
       PanelWidgetClass txt_z {
+       clipchildren 1
        ignorepointer 1
-       position 0 0
-       size 150 24
+       color 0.2588 0.5176 0.9176 0.0784
+       position 20 0
+       size 0.88 1
+       valign center_ref
        hexactpos 1
        vexactpos 1
-       hexactsize 1
-       vexactsize 1
+       hexactsize 0
+       vexactsize 0
+       style rover_sim_colorable
        {
-        MultilineEditBoxWidgetClass z_value {
+        EditBoxWidgetClass z_value {
          visible 1
-         size 0.9 0.9
-         halign center_ref
+         clipchildren 1
+         keepsafezone 0
+         color 1 1 1 0.9961
+         position 14 0
+         size 1 0.9
          valign center_ref
          hexactpos 1
          vexactpos 1
          hexactsize 0
          vexactsize 0
          scriptclass "ViewBinding"
-         style DayZNormal
+         style highlight_blue_1
          text "reee"
-         font "gui/fonts/MetronLight22"
-         "exact text" 1
+         "limit visible" 1
+         "Use default text" 0
+         "exact text" 0
+         font "gui/fonts/metronbook"
          {
           ScriptParamsClass {
            Binding_Name "Z"

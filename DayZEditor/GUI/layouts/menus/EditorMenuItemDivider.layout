@@ -2,7 +2,7 @@ FrameWidgetClass EditorMenuDivider {
  visible 1
  clipchildren 1
  position 0 0
- size 0.95 10
+ size 0.95 6
  halign center_ref
  hexactpos 1
  vexactpos 1

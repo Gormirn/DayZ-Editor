@@ -68,11 +68,11 @@ FrameWidgetClass EditorMenuItem {
        }
       }
       ImageWidgetClass EditorMenuItemIcon {
-       visible 0
+       visible 1
        inheritalpha 1
        ignorepointer 1
-       position 0 0
-       size 25 25
+       position 0 -0.5
+       size 24 24
        valign center_ref
        hexactpos 1
        vexactpos 1
@@ -81,10 +81,12 @@ FrameWidgetClass EditorMenuItem {
        scaled 1
        scriptclass "ViewBinding"
        image0 ""
+       imageTexture "{5E2BA9CFCF99DFE0}DayZEditor/GUI/icons/icon_save.edds"
        mode blend
        "src alpha" 1
-       stretch 1
+       stretch 0
        filter 1
+       nocache 0
        pivot 0.5 0.5
        {
         ScriptParamsClass {
@@ -97,8 +99,7 @@ FrameWidgetClass EditorMenuItem {
        clipchildren 0
        inheritalpha 0
        ignorepointer 1
-       position 0 0
-       size 0.3 1
+       size 0.3 0.55
        halign right_ref
        valign center_ref
        hexactpos 1
@@ -107,9 +108,10 @@ FrameWidgetClass EditorMenuItem {
        vexactsize 0
        scriptclass "ViewBinding"
        text "shortcut"
-       font "gui/fonts/Metron14"
+       font "gui/fonts/Metron"
        "exact text" 0
-       "size to text h" 0
+       "size to text h" 1
+       "size to text v" 0
        "text halign" right
        "text valign" center
        {

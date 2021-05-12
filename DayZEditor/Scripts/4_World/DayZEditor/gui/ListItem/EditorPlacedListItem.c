@@ -1,20 +1,19 @@
-
-// on refactor, editor object in constructor
 class EditorPlacedListItem: EditorListItem
 {
 	protected EditorObject m_EditorObject;
-	EditorObject GetData() { 
+	EditorObject GetEditorObject() 
+	{ 
 		return m_EditorObject; 
 	}
 	
-	protected ref DragHandler m_DragHandler;
+	protected ref EditorDragHandler m_DragHandler;
 	
 	void EditorPlacedListItem(EditorObject editor_object)
 	{
 		EditorLog.Trace("EditorPlacedListItem::SetEditorObject"); 
 		m_EditorObject = editor_object;
 		
-		m_DragHandler = new DragHandler(m_EditorObject);
+		m_DragHandler = new EditorDragHandler(m_EditorObject);
 		
 		m_TemplateController.Label = m_EditorObject.GetDisplayName();
 		m_TemplateController.NotifyPropertyChanged("Label");
@@ -47,7 +46,8 @@ class EditorPlacedListItem: EditorListItem
 		return true;
 	}
 	
-	override bool IsSelected() {
+	override bool IsSelected() 
+	{
 		return m_EditorObject.IsSelected();
 	}
 	
@@ -55,7 +55,6 @@ class EditorPlacedListItem: EditorListItem
 	{
 		switch (args.GetMouseButton()) {
 
-			
 			case MouseState.LEFT: {
 
 				if (KeyState(KeyCode.KC_LCONTROL)) {
@@ -111,7 +110,6 @@ class EditorPlacedListItem: EditorListItem
 				m_EditorObject.ShowWorldObject(args.GetButtonState());
 				break;
 			}
-			
 		}
 		
 		return true;
@@ -154,8 +152,13 @@ class EditorPlacedListItem: EditorListItem
 	
 	override bool OnDoubleClick(Widget w, int x, int y, int button)
 	{
-		GetEditor().CommandManager.ObjectPropertiesCommand.Execute(this, null);
+		GetEditor().CommandManager[EditorObjectPropertiesCommand].Execute(this, null);
 		
 		return true;
+	}
+	
+	override string GetLayoutFile()
+	{
+		return "DayZEditor/gui/Layouts/items/EditorPlacedListItem.layout";
 	}
 }

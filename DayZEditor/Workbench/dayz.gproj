@@ -32,6 +32,7 @@ GameProjectClass {
 			widgetStyles {
 				"gui/looknfeel/dayzwidgets.styles" 
 				"gui/looknfeel/widgets.styles"
+				"DayZEditor/gui/looknfeel/editorwidgets.styles"
 			}
 			ScriptModules {
 				ScriptModulePathClass {
@@ -61,7 +62,7 @@ GameProjectClass {
 						"JM/CF/ModStorage/3_Game"
 						"JM/CF/LayoutBindingManager/3_Game"
 						"JM/CF/Permissions/3_Game"
-						"JM/CF/Debugger/3_Game"
+						"JM/CF/DebugUI/3_Game"
 						"DayZEditor/scripts/3_Game"
 					}
 					EntryPoint "CreateGame"

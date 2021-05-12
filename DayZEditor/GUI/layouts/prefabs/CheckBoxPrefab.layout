@@ -1,48 +1,57 @@
-WrapSpacerWidgetClass CheckBoxPrefab {
+FrameWidgetClass CheckBoxPrefab {
  visible 1
- size 0.5 24
+ clipchildren 0
+ position 0 0
+ size 0.9 16
  halign center_ref
  valign center_ref
- hexactpos 1
- vexactpos 1
+ hexactpos 0
+ vexactpos 0
  hexactsize 0
  vexactsize 1
+ scaled 1
  scriptclass ""
- style Colorable
- Padding 0
- Margin 5
- content_halign center
- content_valign center
  {
   TextWidgetClass Caption {
+   visible 1
    clipchildren 0
    ignorepointer 1
-   position 0 0
-   size 0.4 1
+   position -0.15 0
+   size 0.45 1
+   halign center_ref
    valign center_ref
-   hexactpos 1
-   vexactpos 1
+   hexactpos 0
+   vexactpos 0
    hexactsize 0
    vexactsize 0
    scriptclass "ViewBinding"
-   "text offset" -10 0
-   "text halign" right
+   "text halign" center
+   "text valign" center
    {
     ScriptParamsClass {
      Binding_Name "Caption"
+     Two_Way_Binding 0
     }
    }
   }
   CheckBoxWidgetClass CheckBox {
-   size 24 24
-   halign center_ref
+   visible 1
+   clipchildren 0
+   inheritalpha 0
+   keepsafezone 0
+   color 0.902 0.902 0.902 1
+   position 0.2 0
+   size 16 16
+   halign right_ref
    valign center_ref
-   hexactpos 1
-   vexactpos 1
+   hexactpos 0
+   vexactpos 0
    hexactsize 1
    vexactsize 1
+   scaled 1
    scriptclass "ViewBinding"
-   style Default
+   style dze_checkbox_white
+   checked 0
    {
     ScriptParamsClass {
      Binding_Name "Value"

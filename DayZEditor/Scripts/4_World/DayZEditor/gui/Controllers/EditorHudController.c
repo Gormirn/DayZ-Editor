@@ -119,6 +119,7 @@ class EditorHudController: EditorControllerBase
 		if (Model == "Red9") return true;
 		if (Model == "QuickieBow") return true;
 		if (Model == "LargeTentBackPack") return true;
+		if (Model == "SurvivorMale_Base" || Model == "SurvivorFemale_Base") return true;
 		if (GetGame().IsKindOf(Model, "GP25Base")) return true;
 		if (GetGame().IsKindOf(Model, "M203Base")) return true;
 	
@@ -181,7 +182,6 @@ class EditorHudController: EditorControllerBase
 		}
 	}
 	
-			
 	void LeftbarHideExecute(ButtonCommandArgs args) 
 	{
 		LeftbarFrame.Show(!args.GetButtonState());
@@ -211,9 +211,6 @@ class EditorHudController: EditorControllerBase
 		RightbarSpacerData.Insert(category);
 	}	
 
-
-
-	
 	override bool OnMouseButtonDown(Widget w, int x, int y, int button)
 	{
 		EditorLog.Trace("EditorHudController::OnMouseButtonDown");
@@ -221,7 +218,6 @@ class EditorHudController: EditorControllerBase
 		if (button == MouseState.RIGHT) {
 		
 			switch (w) {
-
 				case LeftbarSearchBar: {
 					SearchBarData = string.Empty;
 					NotifyPropertyChanged("SearchBarData");
@@ -229,10 +225,10 @@ class EditorHudController: EditorControllerBase
 				}
 			}	
 		}
-		
+	
 		return super.OnMouseButtonDown(w, x, y, button);
 	}
-
+	
 	// Raycast to see if TranslationWidget is under cursor	
 	/*		
 	RaycastRVParams raycast_params = new RaycastRVParams(GetGame().GetCurrentCameraPosition(), GetGame().GetCurrentCameraPosition() + GetGame().GetPointerDirection() * EditorSettings.OBJECT_VIEW_DISTANCE);
@@ -258,7 +254,6 @@ class EditorHudController: EditorControllerBase
 		}
 	}
 	*/
-	
 	
 	override bool OnMouseWheel(Widget w, int x, int y, int wheel)
 	{
@@ -300,7 +295,6 @@ class EditorHudController: EditorControllerBase
 		
 		return false;
 	}
-	
 	
 	private void OnObjectSelected(Class context, EditorObject target)
 	{

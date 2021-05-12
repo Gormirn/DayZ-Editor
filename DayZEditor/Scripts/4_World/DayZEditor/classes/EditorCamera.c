@@ -1,6 +1,4 @@
 
-
-
 // make option Q and E go up and down no matter orientation
 class EditorCamera: Camera
 {
@@ -12,6 +10,8 @@ class EditorCamera: Camera
 	float Sharpness;
 	float NearPlane;
 	float Exposure;
+	
+	float Smoothing = 0;
 	
 	float Speed = 60;
 	float Boost_Multiplier = 6.5;
@@ -49,7 +49,6 @@ class EditorCamera: Camera
 	{
 		SelectTarget(null);
 	}
-		
 
 	void OnTargetSelected( Object target )
 	{
@@ -79,9 +78,7 @@ class EditorCamera: Camera
 
 		SelectedTarget = target;
 	}
-	
-	private float cursor_store_x, cursor_store_y;
-	
+		
 	override void EOnFrame(IEntity other, float timeSlice)
 	{		
 		if ( SendUpdateAccumalator > 0.5 ){
@@ -106,15 +103,12 @@ class EditorCamera: Camera
 		float pitchDiff = input.LocalValue("UAAimDown") - input.LocalValue("UAAimUp");
 		float speedInc = input.LocalValue("UACameraToolSpeedIncrease" ) - input.LocalValue("UACameraToolSpeedDecrease");
 		float zoomAmt = input.LocalValue("EditorCameraZoomIn") - input.LocalValue("EditorCameraZoomOut");
-		
-
-		
+				
 		if (KeyState(KeyCode.KC_LSHIFT)) {
 			zoomAmt *= 0.1;
 		} else {
 			zoomAmt *= 0.01;
 		}
-		
 		
 		vector current_position = GetPosition();
 		float current_altitude = current_position[1] - GetGame().SurfaceY(current_position[0], current_position[2]);
@@ -132,9 +126,6 @@ class EditorCamera: Camera
 			SetFOV(1);
 		}
 		
-		Math.Clamp(Speed, 0.001, FLT_MAX);
-		
-		
 		if (MoveEnabled) {
 						
 			if (Boost_Multiplier > 0) {
@@ -150,11 +141,11 @@ class EditorCamera: Camera
 				}
 			}
 			
-			linearVelocity = linearVelocity * Drag;
-
-			linearVelocity = linearVelocity + (transform[0] * strafe * cam_speed);
-			linearVelocity = linearVelocity + (transform[1] * altitude * cam_speed);
-			linearVelocity = linearVelocity + (transform[2] * forward * cam_speed);
+			linearVelocity = linearVelocity * Smoothing;
+			float temp_cam_speed = Math.Lerp(cam_speed, cam_speed * 0.01, Smoothing);
+			linearVelocity = linearVelocity + (transform[0] * strafe * temp_cam_speed);
+			linearVelocity = linearVelocity + (transform[1] * altitude * temp_cam_speed);
+			linearVelocity = linearVelocity + (transform[2] * forward * temp_cam_speed);
 
 			transform[3] = transform[3] + ( linearVelocity * timeSlice );
 
@@ -175,14 +166,14 @@ class EditorCamera: Camera
 		
 		
 		if ((input.LocalValue("UATempRaiseWeapon") || !GetGame().GetUIManager().IsCursorVisible()) && LookEnabled) {
-			//SelectTarget(null);
 			
-			angularVelocity = vector.Zero;
-			angularVelocity[0] = angularVelocity[0] + ( yawDiff * Mouse_Sens * 10 );
-			angularVelocity[1] = angularVelocity[1] + ( pitchDiff * Mouse_Sens * 10);
+			angularVelocity = angularVelocity * Smoothing;			
+			float temp_cam_rot_speed = Math.Lerp(Mouse_Sens, Mouse_Sens * 0.01, Smoothing);
+			angularVelocity[0] = angularVelocity[0] + ( yawDiff * temp_cam_rot_speed * 10 );
+			angularVelocity[1] = angularVelocity[1] + ( pitchDiff * temp_cam_rot_speed * 10);
 			
 			if (shouldRoll) {
-				angularVelocity[2] = angularVelocity[2] + ( speedInc * Mouse_Sens * 10);
+				angularVelocity[2] = angularVelocity[2] + ( speedInc * temp_cam_rot_speed * 10);
 			}
 			
 			orientation = GetOrientation();
@@ -201,8 +192,6 @@ class EditorCamera: Camera
 			LookAt(TargetPosition);
 		}
 	}
-
-
 
 	void AngleToQuat( float angle, vector dir, out float d[4] )
 	{
@@ -264,16 +253,3 @@ class EditorCamera: Camera
 		}		
 	}
 }
-
-
-
-class DSLRCamera: EntityAI
-{
-	void DSLRCamera()
-	{
-		EditorLog.Trace("DSLRCamera");
-	}	
-}
-
-
-

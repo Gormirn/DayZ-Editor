@@ -9,45 +9,52 @@ class EditorExportCommandBase: EditorCommand
 		if (file_dialog.ShowDialog(file_name, export_settings) != DialogResult.OK) {
 			return;
 		}
-				
+		
 		if (file_name == string.Empty) {
 			MessageBox.Show("Error", "No file name specified!", MessageBoxButtons.OK);
 			return;
 		}
-
-		ExportFile(file_name, export_settings);
+		
+		ExportFile(file_name, export_settings, true);
 	}
 	
-	protected void ExportFile(string file_name, ExportSettings export_settings)
+	protected bool ExportFile(string file_name, ExportSettings export_settings, bool warn_on_overwrite)
 	{
 		EditorFileType file_type = EditorFileType.Cast(GetFileType().Spawn());
 		if (!file_type) {
 			EditorLog.Error("Invalid FileType in Export");
-			return;
+			return false;
 		}
 		
 		// Warn the user if they are exporting with deleted objects
 		if (GetEditor().GetObjectManager().GetDeletedObjects().Count() > 0 && !file_type.IsInherited(EditorDZEFile)) {
 			if (EditorMessageBox.Show("Export Warning!", "NOTE: Exporting with this format does NOT support Object Deletion! You need to use .dze file format for this (File > Save)", MessageBoxButtons.OKCancel) == DialogResult.Cancel) {
-				return;
+				return false;
 			}
 		}
 		
 		file_name = "$profile:Editor/" + file_name;
 		EditorFileManager.GetSafeFileName(file_name, file_type.GetExtension());
 		
-		EditorSaveData save_data = EditorSaveData.CreateFromEditor(m_Editor, export_settings.ExportSelectedOnly);
+		if (FileExist(file_name) && warn_on_overwrite) {
+			if (MessageBox.Show("Are you sure?", "File " + file_name + " already exists. Overwrite?", MessageBoxButtons.OKCancel) == DialogResult.Cancel) {
+				return false;
+			}
+		}
 		
+		EditorSaveData save_data = EditorSaveData.CreateFromEditor(m_Editor, export_settings.ExportSelectedOnly);
 		file_type.Export(save_data, file_name, export_settings);		
 		
 		string message = string.Format("Saved %1 objects! (%2 deletions)", save_data.EditorObjects.Count().ToString(), CF.ObjectManager.GetHiddenMapObjects().Count());
 		m_Editor.GetEditorHud().CreateNotification(message, COLOR_GREEN);
 		EditorLog.Info(message);
+		return true;
 	}
 	
 	typename GetFileType();
 	
-	string GetDialogButtonName() {
+	string GetDialogButtonName() 
+	{
 		return "Export";
 	}
 }
